@@ -1,0 +1,4 @@
+release: latest
+minion_group: all
+masterless: false
+use_hosts: false

@@ -1,0 +1,31 @@
+- name: fetch public key
+  fetch:
+    src:  "{{ansible_fqdn}}.pub"
+    dest: "{{keydir.path}}/"
+    flat: true
+  delegate_to: "{{groups.master[0]}}"
+  
+- name: fetch private key
+  fetch:
+    src:  "{{ansible_fqdn}}.pem"
+    dest: "{{keydir.path}}/"
+    flat: true
+  delegate_to: "{{groups.master[0]}}"
+  
+- name: copy private key to minion
+  copy:
+    src: "{{keydir.path}}/{{ansible_fqdn}}.pem"
+    dest: /etc/salt/pki/minion/ 
+  when: not 'exists' in salt_key.msg
+
+- name: copy public key to minion
+  copy:
+    src: "{{keydir.path}}/{{ansible_fqdn}}.pub"
+    dest: /etc/salt/pki/minion/ 
+
+- name: copy public key to master
+  copy:
+    src: "{{keydir.path}}/{{ansible_fqdn}}.pub" 
+    dest: /etc/salt/pki/master/minions/{{ansible_fqdn}}
+  delegate_to: "{{item}}"
+  loop: "{{groups.master}}"

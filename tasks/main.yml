@@ -1,0 +1,12 @@
+- apt_key:
+    url: "https://repo.saltproject.io/py3/debian/9/amd64/{{release}}/salt-archive-keyring.gpg"
+    keyring: /usr/share/keyrings/salt-archive-keyring.gpg
+
+- apt_repository:
+    repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/salt-archive-keyring.gpg] https://repo.saltproject.io/py3/ubuntu/20.04/amd64/{{release}} focal main"
+
+- import_tasks: minion.yml
+  when: "minion_group == 'all' or minion_group in group_names"
+
+- import_tasks: master.yml
+  when: "'master' in group_names"

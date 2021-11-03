@@ -1,0 +1,63 @@
+- blockinfile:
+    path: /etc/salt/minion
+    block: |
+      master:
+      {% for item in groups.master %}
+      - {{item}}
+      {% endfor %}
+      
+#- name: add hosts entry
+#  lineinfile:
+#    path: /etc/hosts
+#    search_string: {{ansible_fqdn}}
+#    line: 
+#
+- name: mktempdir
+  tempfile:
+    state: directory
+  run_once: true
+  register: remote_keydir
+  delegate_to: "{{groups.master[0]}}"
+
+- tempfile:
+    state: directory
+  run_once: true
+  register: keydir
+  become: false
+  delegate_to: 127.0.0.1
+  
+- debug:
+    msg: "local tempdir {{keydir.path}}"
+  run_once: true
+
+- debug:
+    msg: "remote tempdir {{remote_keydir.path}}"
+  run_once: true
+
+- name: generate minion key
+  block:
+  
+  - command:
+      cmd: "salt-key --gen-keys {{ansible_fqdn}} --gen-keys-dir {{remote_keydir.path}}"
+      creates: "/etc/salt/pki/master/minions/{{ansible_fqdn}}"
+    delegate_to: "{{groups.master[0]}}"
+    register: salt_key
+
+  - import_tasks: minion_deploy_keys.yml
+    when: not 'exists' in salt_key.msg
+
+  always:
+  - name: delete local temp dir
+    file:
+      state: absent
+      path: "{{keydir.path}}"
+    delegate_to: 127.0.0.1
+    when: inventory_hostname == ansible_play_hosts_all[-1]
+    become: false
+  
+  - name: delete remote temp dir
+    file:
+      state: absent
+      path: "{{remote_keydir.path}}"
+    delegate_to: "{{groups.master[0]}}"
+    when: inventory_hostname == ansible_play_hosts_all[-1]

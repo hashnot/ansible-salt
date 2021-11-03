@@ -1,0 +1,17 @@
+- name: install salt-minion
+  apt:
+    update_cache: true
+    name: 
+    - salt-minion
+    policy_rc_d: 101
+
+- import_tasks: minion_with_master.yml
+  when: not masterless
+
+- import_tasks: minion_masterless.yml
+  when: masterless
+
+- service:
+    name: salt-minion
+    enabled: true
+    state: started

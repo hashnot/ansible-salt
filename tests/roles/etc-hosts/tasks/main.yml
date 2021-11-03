@@ -1,0 +1,5 @@
+- name: fill /etc/hosts
+  lineinfile:
+    path: /etc/hosts
+    regex: control
+    line: 192.168.0.8 control

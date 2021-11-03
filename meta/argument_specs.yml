@@ -1,0 +1,17 @@
+argument_specs:
+  main:
+    options:
+      release:
+        type: str
+        default: latest
+        description: Salt release to use
+
+      masterless:
+        type: bool
+        default: false
+        description: Configure minions in masterless mode
+
+      minion_group:
+        type: str
+        default: all
+        description: Ansible group to install salt-minion on.

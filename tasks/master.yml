@@ -1,0 +1,7 @@
+- name: install salt-master
+  apt:
+    name: 
+    - python3-pygit2
+    - salt-master
+#    policy_rc_d: 101
+
